@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: kafka-thingsboard
-          image: voxic/kttb:v3
+          image: voxic/kttb:v4
           imagePullPolicy: IfNotPresent
           env:
             - name: KAFKA_SERVER
@@ -24,3 +24,7 @@ spec:
               value: data
             - name: TB_SERVER
               value: svc-tb:9090
+            - name: TB_USER
+              value: tbusername
+            - name: TB_PASSWORD
+              value: tbpassword
