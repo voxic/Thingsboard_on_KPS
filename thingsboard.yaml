@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tb-log-pv-claim
+  labels:
+    app: tb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tb-data-pv-claim
+  labels:
+    app: tb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: tb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tb
+  template:
+    metadata:
+      labels:
+        app: tb
+    spec:
+      volumes:
+        - name: tb-data
+          persistentVolumeClaim:
+            claimName: tb-data-pv-claim
+        - name: tb-logs
+          persistentVolumeClaim:
+            claimName: tb-log-pv-claim            
+      containers:
+      - name: thingsboard
+        image: thingsboard/tb-postgres
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 9090
+        volumeMounts:
+          - mountPath: /var/logs/thingsboard
+            name: tb-logs
+          - mountPath: /data
+            name: tb-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-tb
+  annotations:
+    sherlock.nutanix.com/http-ingress-path: /
+spec:
+  ports:
+    - protocol: TCP
+      name: web
+      port: 9090
+  selector:
+    app: tb

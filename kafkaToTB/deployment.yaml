@@ -1,0 +1,26 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kafka-thingsboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-thingsboard
+  template:
+    metadata:
+      labels:
+        app: kafka-thingsboard
+    spec:
+      containers:
+        - name: kafka-thingsboard
+          image: voxic/kttb:v3
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_SERVER
+              value: '{{.Services.Kafka.Endpoint}}'
+            - name: KAFKA_TOPIC
+              value: data
+            - name: TB_SERVER
+              value: svc-tb:9090
